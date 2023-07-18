@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const DifferenceInSecond uint64 = 19604073600
+const DifferenceInSecond uint64 = 19603728000
 const DayInSecond uint64 = 60 * 60 * 24
 const YearInSecond uint64 = DayInSecond * 365
 
@@ -19,11 +19,26 @@ type jalaliDate struct {
 }
 
 func Now() *jalaliDate {
-	return convertGregorianToJalali(uint64(time.Now().UTC().Sub(time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC))))
+	return convertGregorianToJalali(Seconds(time.Now()))
+}
+
+func Seconds(t time.Time) uint64 {
+	seconds := uint64(0)
+	s := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+	for s.Before(t) {
+		u := s
+		s = s.AddDate(1, 0, 0)
+		seconds += uint64(s.Sub(u).Seconds())
+	}
+	if s.Equal(t) {
+		return seconds
+	}
+	seconds -= uint64(s.Sub(t).Seconds())
+	return seconds
 }
 
 func convertGregorianToJalali(gregorianSeconds uint64) *jalaliDate {
-	return ToJalai(gregorianSeconds - DifferenceInSecond)
+	return ToJalai(gregorianSeconds - Seconds(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)))
 }
 
 func ToJalai(jalaliSeconds uint64) *jalaliDate {
@@ -38,6 +53,7 @@ func ToJalai(jalaliSeconds uint64) *jalaliDate {
 
 	for jalaliSeconds >= 60 {
 		yearDuration := YearInSecond + uint64(isLeapYear(j.Year))*DayInSecond
+
 		if jalaliSeconds >= yearDuration {
 			jalaliSeconds -= yearDuration
 			j.Year++
