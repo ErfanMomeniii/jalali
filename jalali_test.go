@@ -9,7 +9,3 @@ import (
 func Test_Now(t *testing.T) {
 	fmt.Println(jalali.Now())
 }
-
-func Test_Seconds(t *testing.T) {
-	fmt.Println(jalali.Now())
-}

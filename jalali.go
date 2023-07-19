@@ -6,7 +6,7 @@ import (
 )
 
 const DayInSecond uint64 = 60 * 60 * 24
-const YearInSecond uint64 = DayInSecond * 365
+const YearDay uint64 = 365
 
 type jalaliDate struct {
 	Year  uint64
@@ -18,43 +18,43 @@ func Now() *jalaliDate {
 	return convertGregorianToJalali(time.Now())
 }
 
-func Seconds(t time.Time) uint64 {
-	seconds := uint64(0)
+func Days(t time.Time) uint64 {
+	days := uint64(0)
 	y, m, d := t.Date()
 	t = time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 	s := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 	for s.Before(t) {
 		u := s
 		s = s.AddDate(1, 0, 0)
-		seconds += uint64(s.Sub(u).Seconds())
+		days += uint64(s.Sub(u).Seconds()) / DayInSecond
 	}
 	if s.Equal(t) {
-		return seconds
+		return days
 	}
 
-	seconds -= uint64(s.Sub(t).Seconds())
-	return seconds
+	days -= uint64(s.Sub(t).Seconds()) / DayInSecond
+	return days
 }
 
 func convertGregorianToJalali(t time.Time) *jalaliDate {
-	return ToJalali(Seconds(t) - Seconds(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)))
+	return ToJalali(Days(t) - Days(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)))
 }
 
-func ToJalali(jalaliSeconds uint64) *jalaliDate {
+func ToJalali(jalaliDays uint64) *jalaliDate {
 	j := &jalaliDate{
 		Year:  1,
 		Month: 1,
 		Day:   1,
 	}
 
-	for jalaliSeconds >= DayInSecond {
-		yearDuration := YearInSecond + uint64(isLeapYear(j.Year))*DayInSecond
+	for jalaliDays > 0 {
+		yearDuration := YearDay + uint64(isLeapYear(j.Year))
 
-		if jalaliSeconds >= yearDuration {
-			jalaliSeconds -= yearDuration
+		if jalaliDays >= yearDuration {
+			jalaliDays -= yearDuration
 			j.Year++
 		} else {
-			jalaliSeconds -= DayInSecond
+			jalaliDays--
 			j.Day++
 
 			if ShouldUpdateMonth(j.Year, j.Month, j.Day) {
