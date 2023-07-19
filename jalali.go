@@ -35,15 +35,15 @@ var (
 
 type jalaliDateTime struct {
 	locale Lang
-	year   int64
-	month  int64
-	day    int64
-	hour   int64
-	minute int64
-	second int64
+	year   int
+	month  int
+	day    int
+	hour   int
+	minute int
+	second int
 }
 
-func New(year int64, month int64, day int64, hour int64, minute int64, second int64) *jalaliDateTime {
+func New(year int, month int, day int, hour int, minute int, second int) *jalaliDateTime {
 	return &jalaliDateTime{
 		year:   year,
 		month:  month,
@@ -86,7 +86,7 @@ func secondsInGregorian(t time.Time) int64 {
 func secondsInJalali(j *jalaliDateTime) int64 {
 	monthDay := []int64{31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29}
 	seconds := int64(0)
-	year := int64(1)
+	year := 1
 
 	for year < j.year {
 		seconds += YearInSecond + int64(IsLeapYear(year))*DayInSecond
@@ -97,8 +97,8 @@ func secondsInJalali(j *jalaliDateTime) int64 {
 		seconds += monthDay[i] * DayInSecond
 	}
 
-	seconds += (j.day - 1) * DayInSecond
-	seconds += j.hour*60*60 + j.minute*60 + j.second
+	seconds += int64(j.day-1) * DayInSecond
+	seconds += int64(j.hour*60*60 + j.minute*60 + j.second)
 
 	return seconds
 }
@@ -187,11 +187,11 @@ func ToJalali(jalaliSeconds int64) *jalaliDateTime {
 		}
 	}
 
-	j.second = jalaliSeconds
+	j.second = int(jalaliSeconds)
 
 	return j
 }
-func shouldUpdateMonth(year int64, month int64, day int64) bool {
+func shouldUpdateMonth(year int, month int, day int) bool {
 	switch month {
 	case 1, 2, 3, 4, 5, 6:
 		if day > 31 {
@@ -220,7 +220,7 @@ func shouldUpdateMonth(year int64, month int64, day int64) bool {
 	return false
 }
 
-func IsLeapYear(year int64) int {
+func IsLeapYear(year int) int {
 	switch year % 128 {
 	case 0, 4, 8, 12, 16, 20, 29, 33, 37, 41, 45, 49, 53, 62, 66, 70, 74, 78, 82, 86, 95, 99, 103, 107, 111, 115, 124:
 		return 1
@@ -259,7 +259,7 @@ func (j *jalaliDateTime) Add(t jalaliDateTime) *jalaliDateTime {
 }
 
 func (j *jalaliDateTime) AddDate(year int, month int, day int) *jalaliDateTime {
-	return j.Add(jalaliDateTime{j.locale, int64(year), int64(month), int64(day), 0, 0, 0})
+	return j.Add(jalaliDateTime{j.locale, year, month, day, 0, 0, 0})
 }
 
 func (j *jalaliDateTime) Yesterday() *jalaliDateTime {
@@ -272,27 +272,27 @@ func (j *jalaliDateTime) Tomorrow() *jalaliDateTime {
 	return newDate.Add(jalaliDateTime{0, 0, 0, 1, 0, 0, 0})
 }
 
-func (j *jalaliDateTime) Year() int64 {
+func (j *jalaliDateTime) Year() int {
 	return j.year
 }
 
-func (j *jalaliDateTime) Month() int64 {
+func (j *jalaliDateTime) Month() int {
 	return j.month
 }
 
-func (j *jalaliDateTime) Day() int64 {
+func (j *jalaliDateTime) Day() int {
 	return j.day
 }
 
-func (j *jalaliDateTime) Hour() int64 {
+func (j *jalaliDateTime) Hour() int {
 	return j.hour
 }
 
-func (j *jalaliDateTime) Minute() int64 {
+func (j *jalaliDateTime) Minute() int {
 	return j.minute
 }
 
-func (j *jalaliDateTime) Second() int64 {
+func (j *jalaliDateTime) Second() int {
 	return j.second
 }
 
@@ -322,7 +322,7 @@ func (j *jalaliDateTime) DayOfWeek() int {
 }
 
 func (j *jalaliDateTime) WeekToString() string {
-	return localizeDay(int64(j.DayOfWeek()), j.locale)
+	return localizeDay(j.DayOfWeek(), j.locale)
 }
 
 func (j *jalaliDateTime) MonthToString() string {
@@ -333,16 +333,16 @@ func (j *jalaliDateTime) Time() time.Time {
 	return time.Date(int(j.year), time.Month(j.month), int(j.day), int(j.hour), int(j.minute), int(j.second), 0, time.Local)
 }
 
-func localizeDay(n int64, locale Lang) string {
-	if n <= 0 || n >= int64(len(days[locale])) {
+func localizeDay(n int, locale Lang) string {
+	if n <= 0 || n >= len(days[locale]) {
 		n = 0
 	}
 
 	return days[locale][n]
 }
 
-func localizeMonth(n int64, locale Lang) string {
-	if n <= 0 || n >= int64(len(months[locale])) {
+func localizeMonth(n int, locale Lang) string {
+	if n <= 0 || n >= len(months[locale]) {
 		n = 0
 	}
 

@@ -30,13 +30,13 @@ func Test_Everything(t *testing.T) {
 	assert.Equal(t, g.Day(), 19)
 
 	// check yesterday and tomorrow
-	assert.Equal(t, j.Yesterday().Day(), int64(27))
-	assert.Equal(t, j.Yesterday().Month(), int64(4))
-	assert.Equal(t, j.Yesterday().Year(), int64(1402))
+	assert.Equal(t, j.Yesterday().Day(), 27)
+	assert.Equal(t, j.Yesterday().Month(), 4)
+	assert.Equal(t, j.Yesterday().Year(), 1402)
 
-	assert.Equal(t, j.Tomorrow().Day(), int64(29))
-	assert.Equal(t, j.Tomorrow().Month(), int64(4))
-	assert.Equal(t, j.Tomorrow().Year(), int64(1402))
+	assert.Equal(t, j.Tomorrow().Day(), 29)
+	assert.Equal(t, j.Tomorrow().Month(), 4)
+	assert.Equal(t, j.Tomorrow().Year(), 1402)
 
 	// check day of week,month and year
 	assert.Equal(t, j.DayOfWeek(), 5)
