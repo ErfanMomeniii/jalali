@@ -6,68 +6,98 @@ import (
 )
 
 const DayInSecond uint64 = 60 * 60 * 24
-const YearDay uint64 = 365
+const YearInSecond uint64 = 365 * DayInSecond
 
-type jalaliDate struct {
-	Year  uint64
-	Month uint64
-	Day   uint64
+type jalaliDateTime struct {
+	year   uint64
+	month  uint64
+	day    uint64
+	hour   uint64
+	minute uint64
+	second uint64
 }
 
-func Now() *jalaliDate {
+func Now() *jalaliDateTime {
 	return convertGregorianToJalali(time.Now())
 }
 
-func Days(t time.Time) uint64 {
-	days := uint64(0)
-	y, m, d := t.Date()
-	t = time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+func Seconds(t time.Time) uint64 {
+	seconds := uint64(0)
 	s := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 	for s.Before(t) {
 		u := s
 		s = s.AddDate(1, 0, 0)
-		days += uint64(s.Sub(u).Seconds()) / DayInSecond
+		seconds += uint64(s.Sub(u).Seconds())
 	}
 	if s.Equal(t) {
-		return days
+		return seconds
 	}
 
-	days -= uint64(s.Sub(t).Seconds()) / DayInSecond
-	return days
+	seconds -= uint64(s.Sub(t).Seconds())
+	return seconds
 }
 
-func convertGregorianToJalali(t time.Time) *jalaliDate {
-	return ToJalali(Days(t) - Days(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)))
+func convertGregorianToJalali(t time.Time) *jalaliDateTime {
+	return ToJalali(Seconds(t) -
+		Seconds(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)) +
+		3*60*60 + 30*60)
 }
 
-func ToJalali(jalaliDays uint64) *jalaliDate {
-	j := &jalaliDate{
-		Year:  1,
-		Month: 1,
-		Day:   1,
+func ToJalali(jalaliSeconds uint64) *jalaliDateTime {
+	j := &jalaliDateTime{
+		year:   1,
+		month:  1,
+		day:    1,
+		hour:   0,
+		minute: 0,
+		second: 0,
 	}
 
-	for jalaliDays > 0 {
-		yearDuration := YearDay + uint64(isLeapYear(j.Year))
+	for jalaliSeconds >= 60 {
+		yearDuration := YearInSecond + uint64(isLeapYear(j.year))*DayInSecond
+		if jalaliSeconds >= yearDuration {
+			jalaliSeconds -= yearDuration
+			j.year++
+		} else if jalaliSeconds >= DayInSecond {
+			jalaliSeconds -= DayInSecond
+			j.day++
 
-		if jalaliDays >= yearDuration {
-			jalaliDays -= yearDuration
-			j.Year++
-		} else {
-			jalaliDays--
-			j.Day++
-
-			if ShouldUpdateMonth(j.Year, j.Month, j.Day) {
-				j.Day = 1
-				j.Month++
+			if ShouldUpdateMonth(j.year, j.month, j.day) {
+				j.day = 1
+				j.month++
 			}
 
-			if j.Month >= 13 {
-				j.Month = 1
-				j.Year++
+			if j.month >= 13 {
+				j.month = 1
+				j.year++
+			}
+		} else {
+			jalaliSeconds -= 60
+			j.minute++
+
+			if j.minute >= 60 {
+				j.minute -= 60
+				j.hour++
+			}
+
+			if j.hour >= 24 {
+				j.hour -= 24
+				j.day++
+			}
+
+			if ShouldUpdateMonth(j.year, j.month, j.day) {
+				j.day = 1
+				j.month++
+			}
+
+			if j.month >= 13 {
+				j.month = 1
+				j.year++
 			}
 		}
 	}
+
+	j.second = jalaliSeconds
 
 	return j
 }
@@ -119,6 +149,30 @@ func isLeapYear(year uint64) int {
 	return 0
 }
 
-func (j *jalaliDate) ToString() string {
-	return fmt.Sprintf("%d - %d - %d", j.Year, j.Month, j.Day)
+func (j *jalaliDateTime) Year() uint64 {
+	return j.year
+}
+
+func (j *jalaliDateTime) Month() uint64 {
+	return j.month
+}
+
+func (j *jalaliDateTime) Day() uint64 {
+	return j.day
+}
+
+func (j *jalaliDateTime) Hour() uint64 {
+	return j.hour
+}
+
+func (j *jalaliDateTime) Minute() uint64 {
+	return j.minute
+}
+
+func (j *jalaliDateTime) Second() uint64 {
+	return j.second
+}
+
+func (j *jalaliDateTime) String() string {
+	return fmt.Sprintf("%04d-%02d-%02d %2d:%2d:%2d", j.year, j.month, j.day, j.hour, j.minute, j.second)
 }

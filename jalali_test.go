@@ -7,5 +7,5 @@ import (
 )
 
 func Test_Now(t *testing.T) {
-	fmt.Println(jalali.Now())
+	fmt.Println(jalali.Now().String())
 }
