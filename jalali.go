@@ -9,8 +9,8 @@ import (
 type Lang int
 
 const (
-	English Lang = iota
-	Persian
+	EnglishLanguage Lang = iota
+	PersianLanguage
 
 	DayInSecond  int64 = 60 * 60 * 24
 	YearInSecond int64 = 365 * DayInSecond
@@ -248,18 +248,28 @@ func Tomorrow() *jalaliDateTime {
 }
 
 func (j *jalaliDateTime) Add(t jalaliDateTime) *jalaliDateTime {
+	t.year++
+	t.month++
+	t.day++
+
 	newDate := ToJalali(secondsInJalali(j) + secondsInJalali(&t))
 	newDate.SetLocale(j.locale)
 
 	return newDate
 }
 
+func (j *jalaliDateTime) AddDate(year int, month int, day int) *jalaliDateTime {
+	return j.Add(jalaliDateTime{j.locale, int64(year), int64(month), int64(day), 0, 0, 0})
+}
+
 func (j *jalaliDateTime) Yesterday() *jalaliDateTime {
-	return ConvertGregorianToJalali(ConvertJalaliToGregorian(j).Add(-24 * time.Hour))
+	newDate := &jalaliDateTime{j.locale, j.year, j.month, j.day, j.hour, j.minute, j.second}
+	return ConvertGregorianToJalali(ConvertJalaliToGregorian(newDate).Add(-24 * time.Hour))
 }
 
 func (j *jalaliDateTime) Tomorrow() *jalaliDateTime {
-	return j.Add(jalaliDateTime{0, 0, 0, 1, 0, 0, 0})
+	newDate := &jalaliDateTime{j.locale, j.year, j.month, j.day, j.hour, j.minute, j.second}
+	return newDate.Add(jalaliDateTime{0, 0, 0, 1, 0, 0, 0})
 }
 
 func (j *jalaliDateTime) Year() int64 {
@@ -290,29 +300,29 @@ func (j *jalaliDateTime) TimeStamp() int64 {
 	return secondsInJalali(j)
 }
 
-func (j *jalaliDateTime) DayOfYear() int64 {
+func (j *jalaliDateTime) DayOfYear() int {
 	today := secondsInJalali(j)
 	j.month = 1
 	j.day = 1
 	startOfYear := secondsInJalali(j)
 	duration := today - startOfYear
 
-	return duration / DayInSecond
+	return int(duration/DayInSecond) + 1
 }
 
-func (j *jalaliDateTime) DayOfMonth() int64 {
-	return j.day
+func (j *jalaliDateTime) DayOfMonth() int {
+	return int(j.day)
 }
 
-func (j *jalaliDateTime) DayOfWeek() int64 {
+func (j *jalaliDateTime) DayOfWeek() int {
 	duration := secondsInJalali(j)
 	duration /= DayInSecond
 
-	return duration % 7
+	return int(duration % 7)
 }
 
 func (j *jalaliDateTime) WeekToString() string {
-	return localizeDay(j.DayOfWeek(), j.locale)
+	return localizeDay(int64(j.DayOfWeek()), j.locale)
 }
 
 func (j *jalaliDateTime) MonthToString() string {
@@ -352,7 +362,7 @@ func localizeNumber(number string, locale Lang) string {
 
 func (j *jalaliDateTime) String() string {
 	switch Lang(j.locale) {
-	case Persian:
+	case PersianLanguage:
 		return fmt.Sprintf("%s-%s-%s %s:%s:%s",
 			localizeNumber(fmt.Sprintf("%04d", j.year), j.locale),
 			localizeNumber(fmt.Sprintf("%02d", j.month), j.locale),
