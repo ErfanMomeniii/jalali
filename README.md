@@ -95,7 +95,7 @@ func main() {
 
 ```
 
-### Usage
+## Usage
 You can find the complete documentation [here](https://pkg.go.dev/github.com/erfanmomeniii/jalali).
 
 #### type jalaliDateTime
