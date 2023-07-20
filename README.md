@@ -267,3 +267,7 @@ Time returns the time.Time equivalent of the jalaliDateTime.
 func (j *jalaliDateTime) String() string
 ```
 String returns the string representation of the jalaliDateTime.
+
+## Contributing
+Pull requests are welcome. For changes, please open an issue first to discuss what you would like to change.
+Please make sure to update tests as appropriate.
