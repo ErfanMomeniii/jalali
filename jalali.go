@@ -33,16 +33,18 @@ var (
 	}
 )
 
+// jalaliDateTime is an instantiation of jalali Date and Time.
 type jalaliDateTime struct {
-	locale Lang
 	year   int
 	month  int
 	day    int
 	hour   int
 	minute int
 	second int
+	locale Lang
 }
 
+// New creates a new instance of a jalaliDateTime.
 func New(year int, month int, day int, hour int, minute int, second int) *jalaliDateTime {
 	return &jalaliDateTime{
 		year:   year,
@@ -54,12 +56,14 @@ func New(year int, month int, day int, hour int, minute int, second int) *jalali
 	}
 }
 
+// SetLocale sets the locale of the jalaliDateTime.
 func (j *jalaliDateTime) SetLocale(lang Lang) {
 	j.locale = lang
 
 	return
 }
 
+// Now returns the current jalaliDateTime.
 func Now() *jalaliDateTime {
 	return ConvertGregorianToJalali(time.Now())
 }
@@ -103,19 +107,22 @@ func secondsInJalali(j *jalaliDateTime) int64 {
 	return seconds
 }
 
+// ConvertGregorianToJalali returns converted date and time on t from gregorian to jalali.
 func ConvertGregorianToJalali(t time.Time) *jalaliDateTime {
 	return ToJalali(secondsInGregorian(t) -
 		secondsInGregorian(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)) +
 		3*60*60 + 30*60)
 }
 
+// ConvertJalaliToGregorian returns converted date and time on j from jalali to gregorian.
 func ConvertJalaliToGregorian(j *jalaliDateTime) time.Time {
-	return ToGregoroian(secondsInJalali(j) +
+	return ToGregorian(secondsInJalali(j) +
 		secondsInGregorian(time.Date(622, 3, 22, 0, 0, 0, 0, time.UTC)) -
 		3*60*60 - 30*60)
 }
 
-func ToGregoroian(gregorianSeconds int64) time.Time {
+// ToGregorian returns time.Time obtained from given seconds.
+func ToGregorian(gregorianSeconds int64) time.Time {
 	j := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	for gregorianSeconds > 0 {
@@ -133,6 +140,7 @@ func ToGregoroian(gregorianSeconds int64) time.Time {
 	return j
 }
 
+// ToJalali returns jalaliDateTime obtained from given seconds.
 func ToJalali(jalaliSeconds int64) *jalaliDateTime {
 	j := &jalaliDateTime{
 		year:   1,
@@ -191,6 +199,7 @@ func ToJalali(jalaliSeconds int64) *jalaliDateTime {
 
 	return j
 }
+
 func shouldUpdateMonth(year int, month int, day int) bool {
 	switch month {
 	case 1, 2, 3, 4, 5, 6:
@@ -220,6 +229,7 @@ func shouldUpdateMonth(year int, month int, day int) bool {
 	return false
 }
 
+// IsLeapYear determines the year is leap or not in jalali date.
 func IsLeapYear(year int) int {
 	switch year % 128 {
 	case 0, 4, 8, 12, 16, 20, 29, 33, 37, 41, 45, 49, 53, 62, 66, 70, 74, 78, 82, 86, 95, 99, 103, 107, 111, 115, 124:
@@ -239,14 +249,17 @@ func IsLeapYear(year int) int {
 	return 0
 }
 
+// Yesterday returns datetime of yesterday.
 func Yesterday() *jalaliDateTime {
 	return ConvertGregorianToJalali(time.Now().Add(-24 * time.Hour))
 }
 
+// Tomorrow returns datetime of tomorrow.
 func Tomorrow() *jalaliDateTime {
 	return ConvertGregorianToJalali(time.Now().Add(24 * time.Hour))
 }
 
+// Add returns the time j+t.
 func (j *jalaliDateTime) Add(t jalaliDateTime) *jalaliDateTime {
 	t.year++
 	t.month++
@@ -258,48 +271,59 @@ func (j *jalaliDateTime) Add(t jalaliDateTime) *jalaliDateTime {
 	return newDate
 }
 
+// AddDate returns the time corresponding to adding the given number of years, months, and days to j.
 func (j *jalaliDateTime) AddDate(year int, month int, day int) *jalaliDateTime {
-	return j.Add(jalaliDateTime{j.locale, year, month, day, 0, 0, 0})
+	return j.Add(jalaliDateTime{year, month, day, 0, 0, 0, j.locale})
 }
 
+// Yesterday returns datetime of yesterday on a given day.
 func (j *jalaliDateTime) Yesterday() *jalaliDateTime {
-	newDate := &jalaliDateTime{j.locale, j.year, j.month, j.day, j.hour, j.minute, j.second}
+	newDate := &jalaliDateTime{j.year, j.month, j.day, j.hour, j.minute, j.second, j.locale}
 	return ConvertGregorianToJalali(ConvertJalaliToGregorian(newDate).Add(-24 * time.Hour))
 }
 
+// Tomorrow returns datetime of tomorrow on a given day.
 func (j *jalaliDateTime) Tomorrow() *jalaliDateTime {
-	newDate := &jalaliDateTime{j.locale, j.year, j.month, j.day, j.hour, j.minute, j.second}
-	return newDate.Add(jalaliDateTime{0, 0, 0, 1, 0, 0, 0})
+	newDate := &jalaliDateTime{j.year, j.month, j.day, j.hour, j.minute, j.second, j.locale}
+	return newDate.Add(jalaliDateTime{0, 0, 1, 0, 0, 0, 0})
 }
 
+// Year returns the year in which j occurs.
 func (j *jalaliDateTime) Year() int {
 	return j.year
 }
 
+// Month returns the month of the year specified by j.
 func (j *jalaliDateTime) Month() int {
 	return j.month
 }
 
+// Day returns the day of the month specified by j.
 func (j *jalaliDateTime) Day() int {
 	return j.day
 }
 
+// Hour returns the hour within the day specified by j, in the range [0, 23].
 func (j *jalaliDateTime) Hour() int {
 	return j.hour
 }
 
+// Minute returns the minute offset within the hour specified by j, in the range [0, 59].
 func (j *jalaliDateTime) Minute() int {
 	return j.minute
 }
 
+// Second returns the second offset within the minute specified by j, in the range [0, 59].
 func (j *jalaliDateTime) Second() int {
 	return j.second
 }
 
+// TimeStamp returns the timestamp of the jalaliDateTime.
 func (j *jalaliDateTime) TimeStamp() int64 {
 	return secondsInJalali(j)
 }
 
+// DayOfYear returns the day of the year for the jalaliDateTime.
 func (j *jalaliDateTime) DayOfYear() int {
 	today := secondsInJalali(j)
 	j.month = 1
@@ -310,10 +334,12 @@ func (j *jalaliDateTime) DayOfYear() int {
 	return int(duration/DayInSecond) + 1
 }
 
+// DayOfMonth returns the day the month for the jalaliDateTime.
 func (j *jalaliDateTime) DayOfMonth() int {
 	return int(j.day)
 }
 
+// DayOfWeek returns the day the week for the jalaliDateTime.
 func (j *jalaliDateTime) DayOfWeek() int {
 	duration := secondsInJalali(j)
 	duration /= DayInSecond
@@ -321,14 +347,17 @@ func (j *jalaliDateTime) DayOfWeek() int {
 	return int(duration % 7)
 }
 
+// WeekToString returns the localized string representation of the day of the week for the jalaliDateTime.
 func (j *jalaliDateTime) WeekToString() string {
 	return localizeDay(j.DayOfWeek(), j.locale)
 }
 
+// MonthToString returns the localized string representation of the month for the jalaliDateTime.
 func (j *jalaliDateTime) MonthToString() string {
 	return localizeMonth(j.month-1, j.locale)
 }
 
+// Time returns the time.Time equivalent of the jalaliDateTime.
 func (j *jalaliDateTime) Time() time.Time {
 	return time.Date(int(j.year), time.Month(j.month), int(j.day), int(j.hour), int(j.minute), int(j.second), 0, time.Local)
 }
@@ -360,6 +389,7 @@ func localizeNumber(number string, locale Lang) string {
 	return string(answer)
 }
 
+// String returns the string representation of the jalaliDateTime.
 func (j *jalaliDateTime) String() string {
 	switch Lang(j.locale) {
 	case PersianLanguage:
