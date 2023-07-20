@@ -271,7 +271,7 @@ func (j *jalaliDateTime) Add(t jalaliDateTime) *jalaliDateTime {
 	return newDate
 }
 
-// AddDate returns the time corresponding to adding the given number of years, months, and days to j.
+// AddDate returns the datetime corresponding to adding the given number of years, months, and days to j.
 func (j *jalaliDateTime) AddDate(year int, month int, day int) *jalaliDateTime {
 	return j.Add(jalaliDateTime{year, month, day, 0, 0, 0, j.locale})
 }
@@ -279,7 +279,11 @@ func (j *jalaliDateTime) AddDate(year int, month int, day int) *jalaliDateTime {
 // Yesterday returns datetime of yesterday on a given day.
 func (j *jalaliDateTime) Yesterday() *jalaliDateTime {
 	newDate := &jalaliDateTime{j.year, j.month, j.day, j.hour, j.minute, j.second, j.locale}
-	return ConvertGregorianToJalali(ConvertJalaliToGregorian(newDate).Add(-24 * time.Hour))
+
+	newDate = ConvertGregorianToJalali(ConvertJalaliToGregorian(newDate).Add(-24 * time.Hour))
+	newDate.locale = j.locale
+
+	return newDate
 }
 
 // Tomorrow returns datetime of tomorrow on a given day.
@@ -318,28 +322,27 @@ func (j *jalaliDateTime) Second() int {
 	return j.second
 }
 
-// TimeStamp returns the timestamp of the jalaliDateTime.
+// TimeStamp returns the timestamp of the j.
 func (j *jalaliDateTime) TimeStamp() int64 {
 	return secondsInJalali(j)
 }
 
-// DayOfYear returns the day of the year for the jalaliDateTime.
+// DayOfYear returns the day of the year for the j.
 func (j *jalaliDateTime) DayOfYear() int {
 	today := secondsInJalali(j)
-	j.month = 1
-	j.day = 1
-	startOfYear := secondsInJalali(j)
+	firstDay := &jalaliDateTime{j.year, 1, 1, 0, 0, 0, 0}
+	startOfYear := secondsInJalali(firstDay)
 	duration := today - startOfYear
 
 	return int(duration/DayInSecond) + 1
 }
 
-// DayOfMonth returns the day the month for the jalaliDateTime.
+// DayOfMonth returns the day of the month for the j.
 func (j *jalaliDateTime) DayOfMonth() int {
-	return int(j.day)
+	return j.day
 }
 
-// DayOfWeek returns the day the week for the jalaliDateTime.
+// DayOfWeek returns the day of the week for the j.
 func (j *jalaliDateTime) DayOfWeek() int {
 	duration := secondsInJalali(j)
 	duration /= DayInSecond
@@ -347,17 +350,17 @@ func (j *jalaliDateTime) DayOfWeek() int {
 	return int(duration % 7)
 }
 
-// WeekToString returns the localized string representation of the day of the week for the jalaliDateTime.
+// WeekToString returns the localized string representation of the day of the week for the j.
 func (j *jalaliDateTime) WeekToString() string {
 	return localizeDay(j.DayOfWeek(), j.locale)
 }
 
-// MonthToString returns the localized string representation of the month for the jalaliDateTime.
+// MonthToString returns the localized string representation of the month for the j.
 func (j *jalaliDateTime) MonthToString() string {
 	return localizeMonth(j.month-1, j.locale)
 }
 
-// Time returns the time.Time equivalent of the jalaliDateTime.
+// Time returns the time.Time equivalent of the j.
 func (j *jalaliDateTime) Time() time.Time {
 	return time.Date(int(j.year), time.Month(j.month), int(j.day), int(j.hour), int(j.minute), int(j.second), 0, time.Local)
 }
