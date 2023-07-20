@@ -96,8 +96,7 @@ func main() {
 ```
 
 ### Usage
-You can see full documentation [Here](https://pkg.go.dev/github.com/erfanmomeniii/jalali).
-
+You can find the complete documentation [here](https://pkg.go.dev/github.com/erfanmomeniii/jalali).
 
 #### type jalaliDateTime
 jalaliDateTime is an instantiation of jalali Date and Time.
