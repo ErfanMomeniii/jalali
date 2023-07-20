@@ -1,11 +1,11 @@
 ![image description](./assets/photos/logo.png)
 <p align="center">
 <a href="https://pkg.go.dev/github.com/erfanmomeniii/jalali?tab=doc"target="_blank">
-    <img src="https://img.shields.io/badge/Go-1.19+-00ADD8?style=for-the-badge&logo=go" alt="go version" />
+    <img src="https://img.shields.io/badge/Go-1.20+-00ADD8?style=for-the-badge&logo=go" alt="go version" />
 </a>
 
 <img src="https://img.shields.io/badge/license-MIT-magenta?style=for-the-badge&logo=none" alt="license" />
-<img src="https://img.shields.io/badge/Version-v2.1.3-red?style=for-the-badge&logo=none" alt="version" />
+<img src="https://img.shields.io/badge/Version-v1.0.0-red?style=for-the-badge&logo=none" alt="version" />
 </p>
 
 # jalali
