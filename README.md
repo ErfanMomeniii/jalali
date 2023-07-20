@@ -79,7 +79,7 @@ func main() {
 
 	j.SetLocale(jalali.EnglishLanguage)
 
-	// Returns the datetime corresponding to adding the given number of years, months, and days to j
+	// Return the datetime corresponding to adding the given number of years, months, and days to j
 	j.AddDate(0, 0, 1) // 1402-04-30 14:15:25
 
 	// Return year, month, day, hour, minute and second of j
